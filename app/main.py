@@ -3,6 +3,21 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def readFromFile(path: str) -> list[str]:
+    try:
+        with open(path, 'r') as f:
+            return [row.strip() for row in f]
+    except FileNotFoundError:
+        logger.error(f"File '{path}' not found.")
+        sys.exit(1)
+    except PermissionError:
+        logger.error(f"Permission denied accessing file '{path}'.")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Error reading file '{path}': {str(e)}")
+        sys.exit(1)
+
+
 def main():
     """Main function."""
     args = parse_args()
@@ -11,6 +26,11 @@ def main():
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
+
+    if '.txt' in args.repos:
+        repos = readReposFromFile(args.repos)
+    else:
+        repos = args.repos
 
     return
 
@@ -27,7 +47,6 @@ def parse_args() -> argparse.Namespace():
       description='Transfers git repos from one server to another.',
       epilog='Good luck and enjoy your coffee')
 
-  parser.add_argument('filename')
   parser.add_argument('-s', '--source', type=str, required=True, help='Source git server to migrate from')
   parser.add_argument('-t', '--target', type=str, required=True, help='Target git server to migrate to')
   parser.add_argument('-r', '--repos', type=str, default=[], required=True, help='List of repos to migrate.')
