@@ -39,6 +39,7 @@ Basic usage:
 
 ```bash
 python main.py -s SOURCE -t TARGET -r REPOS --source-group SOURCE_GROUP --target-group TARGET_GROUP [--ssh]
+```
 
 
 Options:
