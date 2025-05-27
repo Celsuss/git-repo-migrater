@@ -61,19 +61,19 @@ Examples:
 
  1 Migrate a single repository:
 ```bash
-   python main.py -s old.server.com -t new.server.com -r repo1 --source-group oldgroup --target-group newgroup
+python main.py -s old.server.com -t new.server.com -r repo1 --source-group oldgroup --target-group newgroup
 ```
 
  2 Migrate multiple repositories:
 
 ```bash
-   python main.py -s old.server.com -t new.server.com -r repo1,repo2,repo3 --source-group oldgroup --target-group newgroup
+python main.py -s old.server.com -t new.server.com -r repo1,repo2,repo3 --source-group oldgroup --target-group newgroup
 ```
 
  3 Migrate repositories listed in a file using SSH:
 
 ```bash
-   python main.py -s old.server.com -t new.server.com -r repos.txt --source-group oldgroup --target-group newgroup --ssh
+python main.py -s old.server.com -t new.server.com -r repos.txt --source-group oldgroup --target-group newgroup --ssh
 ```
 
 
