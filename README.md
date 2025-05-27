@@ -15,13 +15,17 @@ A tool for migrating Git repositories from one server to another.
 1. Clone this repository:
 
 
+```bash
 git clone https://github.com/Celsuss/git-repo-migrater.git
+```
 
 
 2. Navigate to the project directory:
 
 
+```bash
 cd git-repo-migration-tool
+```
 
 
 3. Ensure Python 3.6+ is installed on your system.
@@ -29,7 +33,9 @@ cd git-repo-migration-tool
 4. Install required dependencies:
 
 
+```bash
 pip install -r requirements.txt
+```
 
 
 
