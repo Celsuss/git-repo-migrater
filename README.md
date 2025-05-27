@@ -6,14 +6,14 @@ A tool for migrating Git repositories from one server to another.
 
 - Migrate multiple Git repositories between servers
 - Support for both HTTPS and SSH protocols
-- Ability to specify repositories directly or read from a file
+- Ability to specify repositories directly, read from a file, or use a TOML configuration file
 - Handles all branches and tags during migration
 - Command-line interface for easy use
+- Logging functionality for better tracking and debugging
 
 ## Installation
 
 1. Clone this repository:
-
 
 ```bash
 git clone https://github.com/Celsuss/git-repo-migrater.git
@@ -24,12 +24,11 @@ git clone https://github.com/Celsuss/git-repo-migrater.git
 
 
 ```bash
-cd git-repo-migration-tool
+cd git-repo-migrater
 ```
 
 
 3. Ensure Python 3.6+ is installed on your system.
-
 4. Install required dependencies:
 
 
@@ -39,12 +38,15 @@ pip install -r requirements.txt
 
 
 
-## Usage
+Usage
 
-Basic usage:
+There are two ways to use this tool:
+
+1. Using command-line arguments:
+
 
 ```bash
-python main.py -s SOURCE -t TARGET -r REPOS --source-group SOURCE_GROUP --target-group TARGET_GROUP [--ssh]
+python app/main.py -s SOURCE -t TARGET -r REPOS --source-group SOURCE_GROUP --target-group TARGET_GROUP [--ssh]
 ```
 
 
@@ -57,23 +59,73 @@ Options:
  • --target-group: Group which the repo belongs to in the target (required)<br>
  • --ssh: Use SSH for git operations instead of HTTPS (optional)<br>
 
-Examples:
+2. Using a TOML configuration file:
 
- 1 Migrate a single repository:
+
 ```bash
-python main.py -s old.server.com -t new.server.com -r repo1 --source-group oldgroup --target-group newgroup
+python app/main.py -c CONFIG_FILE
 ```
 
- 2 Migrate multiple repositories:
 
-```bash
-python main.py -s old.server.com -t new.server.com -r repo1,repo2,repo3 --source-group oldgroup --target-group newgroup
+Options:
+
+ • -c, --config: Path to TOML configuration file
+
+
+Configuration File
+
+You can use a TOML configuration file to specify the migration settings. Here's an example structure:
+
+
+```toml
+[General]
+ssh = true
+
+[Source]
+source = "source-server.com"
+source-group = "source-group"
+
+[Target]
+target = "target-server.com"
+target-group = "target-group"
+
+[Repos]
+reps = ["repo1", "repo2", "repo3"]
 ```
 
- 3 Migrate repositories listed in a file using SSH:
+
+
+Examples
+
+1. Migrate a single repository using command-line arguments:
+
 
 ```bash
-python main.py -s old.server.com -t new.server.com -r repos.txt --source-group oldgroup --target-group newgroup --ssh
+python app/main.py -s old.server.com -t new.server.com -r repo1 --source-group oldgroup --target-group newgroup
+```
+
+
+2. Migrate multiple repositories using command-line arguments:
+
+
+```bash
+python app/main.py -s old.server.com -t new.server.com -r repo1,repo2,repo3 --source-group oldgroup --target-group newgroup
+```
+
+
+3. Migrate repositories listed in a file using SSH:
+
+
+```bash
+python app/main.py -s old.server.com -t new.server.com -r repos.txt --source-group oldgroup --target-group newgroup --ssh
+```
+
+
+4. Migrate repositories using a TOML configuration file:
+
+
+```bash
+python app/main.py -c repos.toml
 ```
 
 
