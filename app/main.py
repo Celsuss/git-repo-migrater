@@ -30,10 +30,46 @@ Version: 1.0
 """
 import argparse
 import logging
+import shutil
 import subprocess
 import sys
 
+import toml
+
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
+
+class ConfigurationError(Exception):
+    """Custom exception for configuration errors."""
+
+    pass
+
+
+def cleanup_repositories(repos):
+    for path in repos:
+        if delete_local_repo(path):
+            logger.info(f"Cleaned up repository: {path}")
+        else:
+            logger.warning(f"Failed to clean up repository: {path}")
+
+
+def delete_local_repo(repo_dir: str) -> bool:
+    """
+    Delete the local repository directory.
+
+    Args:
+    repo_dir (str): The directory of the repository to delete.
+
+    Returns:
+    bool: True if deletion was successful, False otherwise.
+    """
+    try:
+        shutil.rmtree(repo_dir)
+        logger.info(f"Deleted local repository: {repo_dir}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to delete local repository {repo_dir}: {e}")
 
 
 def execute_git_command(command: list[str], cwd: str = None) \
@@ -93,31 +129,31 @@ def migrate_repo(repo: str, source: str, target: str, source_group: str,
     if not success:
         return False
 
-    # Change to the cloned repository directory
-    repo_dir = f"{repo}.git"
+    # # Change to the cloned repository directory
+    # repo_dir = f"{repo}.git"
 
-    # Add the new remote
-    logger.info(f'Git remote add new-origin {source_url}')
-    add_remote_cmd = ["git", "remote", "add", "new-origin", target_url]
-    success, output = execute_git_command(add_remote_cmd, cwd=repo_dir)
-    if not success:
-        return False
+    # # Add the new remote
+    # logger.info(f'Git remote add new-origin {source_url}')
+    # add_remote_cmd = ["git", "remote", "add", "new-origin", target_url]
+    # success, output = execute_git_command(add_remote_cmd, cwd=repo_dir)
+    # if not success:
+    #     return False
 
-    # Push all branches
-    logger.info('Git push branches to new-origin')
-    push_branches_cmd = ["git", "push", "new-origin", "--all"]
-    success, output = execute_git_command(push_branches_cmd, cwd=repo_dir)
-    if not success:
-        return False
+    # # Push all branches
+    # logger.info('Git push branches to new-origin')
+    # push_branches_cmd = ["git", "push", "new-origin", "--all"]
+    # success, output = execute_git_command(push_branches_cmd, cwd=repo_dir)
+    # if not success:
+    #     return False
 
-    # Push all tags
-    logger.info('Git push tags to new-origin')
-    push_tags_cmd = ["git", "push", "new-origin", "--tags"]
-    success, output = execute_git_command(push_tags_cmd, cwd=repo_dir)
-    if not success:
-        return False
+    # # Push all tags
+    # logger.info('Git push tags to new-origin')
+    # push_tags_cmd = ["git", "push", "new-origin", "--tags"]
+    # success, output = execute_git_command(push_tags_cmd, cwd=repo_dir)
+    # if not success:
+    #     return False
 
-    logger.info(f"Successfully migrated repository: {repo}")
+    # logger.info(f"Successfully migrated repository: {repo}")
     return True
 
 
@@ -150,6 +186,21 @@ def readReposFromFile(path: str) -> list[str]:
         sys.exit(1)
 
 
+def read_toml_config(config_path: str) -> dict:
+    try:
+        with open(config_path, 'r') as f:
+            return toml.load(f)
+    except FileNotFoundError:
+        logger.error(f"Config file '{config_path}' not found.")
+        sys.exit(1)
+    except toml.TomlDecodeError as e:
+        logger.error(f"Error parsing TOML file: {str(e)}")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Error reading config file '{config_path}': {str(e)}")
+        sys.exit(1)
+
+
 def main():
     """
     Start function to orchestrate the repository migration process.
@@ -158,24 +209,43 @@ def main():
     and initiates the migration process for each repository.
     """
     args = parse_args()
+    if args.config:
+        config = read_toml_config(args.config)
+        source = config['Source']['source']
+        source_group = config['Source']['source-group']
+        target = config['Target']['target']
+        target_group = config['Target']['target-group']
+        repos = config['Repos']['reps']
+        use_ssh = config.get('SSH', {}).get('use_ssh', False)  # Default to False if not specified
+    else:
+        check_args(args)
+        source = args.source
+        source_group = args.source_group
+        target = args.target
+        target_group = args.target_group
+        if '.txt' in args.repos:
+            repos = readReposFromFile(args.repos)
+        else:
+            repos = args.repos if isinstance(args.repos, list) else [args.repos]
+        use_ssh = args.ssh
+    """"""
     try:
         check_args(args)
     except Exception as e:
-        print(f"Error: {e}")
+        logger.error(f"Error: {e}")
         sys.exit(1)
-
-    if '.txt' in args.repos:
-        repos = readReposFromFile(args.repos)
-    else:
-        repos = args.repos
 
     print(repos)
 
     for repo in repos:
-        success = migrate_repo(repo, args.source, args.target,
-                               args.source_group, args.target_group, args.ssh)
+        success = migrate_repo(repo, source, target,
+                               source_group, target_group, use_ssh)
         if not success:
             logger.error(f"Failed to migrate repository: {repo}")
+        break
+
+    # TODO Implment this
+    # cleanup_repositories(repos)
     return
 
 
@@ -189,9 +259,22 @@ def check_args(args: argparse.ArgumentParser):
     Raises:
         argparse.ArgumentTypeError: If source and target are the same.
     """
-    if args.source == args.target:
-        logger.error(f'Source and target are both {args.source}')
-        raise argparse.ArgumentTypeError('Source and target can not be equal')
+    try:
+        if args.config:
+            if any([args.source, args.target, args.repos,
+                    args.source_group, args.target_group]):
+                raise ValueError('When using a config file, do not specify \
+                other arguments.')
+        elif not all([args.source, args.target, args.repos,
+                      args.source_group, args.target_group]):
+            raise ValueError('All arguments are required when not using \
+        a config file.')
+        elif args.source == args.target:
+            raise ValueError('Source and target cannot be equal')
+
+    except ValueError as e:
+        logger.error(f"Configuration error: {e}")
+        sys.exit(1)
 
 
 def parse_args() -> argparse.Namespace():
@@ -206,18 +289,17 @@ def parse_args() -> argparse.Namespace():
         description='Transfers git repos from one server to another.',
         epilog='Good luck and enjoy your coffee')
 
+    parser.add_argument('-c', '--config', type=str,
+                        help='Path to TOML configuration file')
     parser.add_argument('-s', '--source', type=str,
-                        required=True,
                         help='Source git server to migrate from')
     parser.add_argument('-t', '--target', type=str,
-                        required=True, help='Target git server to migrate to')
+                        help='Target git server to migrate to')
     parser.add_argument('-r', '--repos', type=str, default=[],
-                        required=True, help='List of repos to migrate.')
+                        help='List of repos to migrate.')
     parser.add_argument('--source-group', type=str, default=[],
-                        required=True,
                         help='Group which the repo belongs to in the source.')
     parser.add_argument('--target-group', type=str, default=[],
-                        required=True,
                         help='Group which the repo belongs to in the target.')
     parser.add_argument('--ssh', action='store_true',
                         help='Use SSH for git operations instead of HTTPS')
