@@ -44,26 +44,31 @@ python main.py -s SOURCE -t TARGET -r REPOS --source-group SOURCE_GROUP --target
 
 Options:
 
- • -s, --source: Source git server URL (required)
- • -t, --target: Target git server URL (required)
- • -r, --repos: List of repositories to migrate or path to a .txt file containing repository names (required)
- • --source-group: Group which the repo belongs to in the source (required)
- • --target-group: Group which the repo belongs to in the target (required)
- • --ssh: Use SSH for git operations instead of HTTPS (optional)
+ • -s, --source: Source git server URL (required)<br>
+ • -t, --target: Target git server URL (required)<br>
+ • -r, --repos: List of repositories to migrate or path to a .txt file containing repository names (required)<br>
+ • --source-group: Group which the repo belongs to in the source (required)<br>
+ • --target-group: Group which the repo belongs to in the target (required)<br>
+ • --ssh: Use SSH for git operations instead of HTTPS (optional)<br>
 
 Examples:
 
  1 Migrate a single repository:
-
+```bash
    python main.py -s old.server.com -t new.server.com -r repo1 --source-group oldgroup --target-group newgroup
+```
 
  2 Migrate multiple repositories:
 
+```bash
    python main.py -s old.server.com -t new.server.com -r repo1,repo2,repo3 --source-group oldgroup --target-group newgroup
+```
 
  3 Migrate repositories listed in a file using SSH:
 
+```bash
    python main.py -s old.server.com -t new.server.com -r repos.txt --source-group oldgroup --target-group newgroup --ssh
+```
 
 
 
