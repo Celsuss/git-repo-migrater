@@ -216,7 +216,7 @@ def main():
         target = config['Target']['target']
         target_group = config['Target']['target-group']
         repos = config['Repos']['reps']
-        use_ssh = config.get('SSH', {}).get('use_ssh', False)  # Default to False if not specified
+        use_ssh = config.get('General', {}).get('ssh', False)  # Default to False if not specified
     else:
         check_args(args)
         source = args.source
@@ -228,14 +228,12 @@ def main():
         else:
             repos = args.repos if isinstance(args.repos, list) else [args.repos]
         use_ssh = args.ssh
-    """"""
+
     try:
         check_args(args)
     except Exception as e:
         logger.error(f"Error: {e}")
         sys.exit(1)
-
-    print(repos)
 
     for repo in repos:
         success = migrate_repo(repo, source, target,
