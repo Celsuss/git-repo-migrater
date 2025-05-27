@@ -15,7 +15,7 @@ A tool for migrating Git repositories from one server to another.
 1. Clone this repository:
 
 
-git clone https://github.com/celsuss/git-repo-migration-tool.git
+git clone https://github.com/Celsuss/git-repo-migrater.git
 
 
 2. Navigate to the project directory:
