@@ -38,7 +38,7 @@ pip install -r requirements.txt
 
 
 
-Usage
+## Usage
 
 There are two ways to use this tool:
 
@@ -67,7 +67,7 @@ python app/main.py -c CONFIG_FILE
 ```
 
 
-Options:
+### Options:
 
  • -c, --config: Path to TOML configuration file
 
@@ -95,7 +95,7 @@ reps = ["repo1", "repo2", "repo3"]
 
 
 
-Examples
+### Examples
 
 1. Migrate a single repository using command-line arguments:
 
@@ -130,11 +130,11 @@ python app/main.py -c repos.toml
 
 
 
-Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 
-License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
